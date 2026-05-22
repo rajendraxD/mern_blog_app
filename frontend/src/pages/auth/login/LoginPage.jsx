@@ -1,0 +1,247 @@
+import TextField from "@mui/material/TextField";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import {
+  Button,
+  // CardHeader,
+  Checkbox,
+  Divider,
+  IconButton,
+  InputAdornment,
+  Link,
+} from "@mui/material";
+import {
+  Facebook,
+  Google,
+  Lock,
+  Person,
+  RemoveRedEyeSharp,
+} from "@mui/icons-material";
+import { useState } from "react";
+import useBreakpoint from "../../../utils/useBreakpoint";
+
+const initialFormData = {
+  email: "",
+  password: "",
+  rememberMe: false,
+};
+
+export default function LoginPage() {
+  const [errors, SetErrors] = useState(initialFormData);
+  const [formData, setFormData] = useState(initialFormData);
+  const { isMobile } = useBreakpoint();
+
+  const isFormInvalid =
+    !formData.email.trim() ||
+    !formData.password ||
+    Object.values(errors).some((msg) => !!msg);
+
+  const handleOnChange = (e) => {
+    const { name, value, type } = e.target;
+    const val = type === "checkbox" ? e.target.checked : value;
+    setFormData({
+      ...formData,
+      [name]: val,
+    });
+    const error = formValidation(name, val);
+    SetErrors((prev) => {
+      return {
+        ...prev,
+        [name]: error,
+      };
+    });
+  };
+
+  const formValidation = (name, val) => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    switch (name) {
+      case "email":
+        if (val.trim() == "") return "Email is required";
+        if (val.length < 5) return "Email must be at least 5 characters";
+        if (val.length > 50) return "Email must be less than 50 characters";
+        if (!emailPattern.test(val)) {
+          return "Please enter a valid email address";
+        }
+        return undefined;
+      case "password":
+        if (val.trim() == "") return "Password is required";
+        if (val.length < 5) return "Password must be at least 5 characters";
+        if (val.length > 20) return "Password must be less than 20 characters";
+        return undefined;
+      default:
+        return undefined;
+    }
+  };
+  const togglePassword = () => {
+    const input = document.getElementById("password");
+    input.type = input.type === "password" ? "text" : "password";
+  };
+  const onSubmit = async () => {
+    try {
+      console.log("formData", formData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const onClear = () => {
+    setFormData(initialFormData);
+    SetErrors(initialFormData);
+
+    // reset password input
+    const input = document.getElementById("password");
+    input.type = "password";
+    input.value = "";
+  };
+  return (
+    <>
+      <div
+        className="flex flex-col justify-center items-center h-screen"
+      >
+        <Card
+          className="w-80 md:w-100 rounded-1xl md:rounded-2xl! md:p-1!"
+          variant={isMobile ? "outlined" : "elevation"}
+        >
+          {/* <CardHeader
+            className="py-1!"
+            title={<span className="text-2xl font-semibold">Sign in</span>}
+            subheader={
+              <span className="text-sm">
+                Secure access to your dashboard
+              </span>
+            }
+          /> */}
+          <CardContent className="py-2!">
+            <div className="py-2">
+              <div className="flex justify-between">
+                <span className="text-2xl font-semibold">Sign in</span>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={onClear}
+                  className="normal-case! rounded-4xl!"
+                  size={isMobile ? 'small' : 'medium'}
+                >Sign Up</Button>
+              </div>
+              <div>
+                <span className="text-sm">
+                  Secure access to your dashboard
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-1 md:gap-2">
+              <div
+                aria-label="text-field with checkbox"
+                className="flex flex-col gap-1"
+              >
+                <div aria-label="text-field" className="flex flex-col gap-2.5">
+                  <TextField
+                    variant="outlined"
+                    placeholder="your@gmail.com"
+                    name="email"
+                    error={!!errors.email}
+                    helperText={errors.email}
+                    value={formData.email}
+                    onChange={handleOnChange}
+                    size={isMobile ? 'small' : 'medium'}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Person />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                  />
+                  <TextField
+                    id="password"
+                    variant="outlined"
+                    placeholder="********"
+                    name="password"
+                    error={!!errors.password}
+                    helperText={errors.password}
+                    value={formData.password}
+                    onChange={handleOnChange}
+                    size={isMobile ? 'small' : 'medium'}
+                    type="password"
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Lock />
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton onClick={togglePassword}>
+                              <RemoveRedEyeSharp />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1">
+                    <Checkbox
+                      name="rememberMe"
+                      checked={formData.rememberMe}
+                      onChange={handleOnChange}
+                      size={isMobile ? 'small' : 'medium'}
+                    />
+                    <span className="text-sm">Remember me</span>
+                  </div>
+                  <Link href="#" underline="none" className="text-sm!">
+                    {"Forgotten password?"}
+                  </Link>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="contained"
+                  className="w-full normal-case!"
+                  onClick={onSubmit}
+                  // loading={loading}
+                  loadingIndicator="Logging in..."
+                  disabled={isFormInvalid}
+                // size={isMobile ? 'small' : 'medium'}
+                >
+                  Login
+                </Button>
+                <Button
+                  variant="contained"
+                  className="normal-case!"
+                  color="secondary"
+                  onClick={onClear}
+                  size={isMobile ? 'small' : 'large'}
+                >
+                  Clear
+                </Button>
+              </div>
+              <Divider className="p-0!">or</Divider>
+              <div className="flex gap-1 justify-center items-center">
+                <IconButton
+                  aria-label="login with google"
+                  size={isMobile ? 'small' : 'medium'}
+                  disabled
+                  color="inherit"
+                >
+                  <Google fontSize="large" />
+                </IconButton>
+                <IconButton
+                  aria-label="login with facebook"
+                  // size={isMobile ? 'small' : 'medium'}
+                  disabled
+                  color="inherit"
+                >
+                  <Facebook fontSize="large" />
+                </IconButton>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </>
+  );
+};
